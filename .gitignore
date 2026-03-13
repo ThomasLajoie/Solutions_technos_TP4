@@ -1,0 +1,65 @@
+# =========================
+# SVELTE / NODE (frontend)
+# =========================
+
+TP4_POC_frontend/node_modules
+TP4_POC_frontend/.svelte-kit
+TP4_POC_frontend/build
+TP4_POC_frontend/dist
+TP4_POC_frontend/.output
+TP4_POC_frontend/.vercel
+TP4_POC_frontend/.netlify
+TP4_POC_frontend/.wrangler
+
+# Vite cache
+TP4_POC_frontend/vite.config.js.timestamp-*
+TP4_POC_frontend/vite.config.ts.timestamp-*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# PHOENIX / ELIXIR (backend)
+# =========================
+
+TP4_POC_backend/_build
+TP4_POC_backend/deps
+TP4_POC_backend/cover
+
+# Phoenix static build
+TP4_POC_backend/priv/static/assets
+TP4_POC_backend/priv/static/cache_manifest.json
+
+# Uploads
+TP4_POC_backend/priv/static/uploads
+
+# Erlang crash dumps
+erl_crash.dump
+
+# =========================
+# ENV
+# =========================
+
+.env
+.env.*
+!.env.example
+!.env.test
+
+# =========================
+# OS
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# EDITORS
+# =========================
+
+.vscode
+.idea
+*.swp
+*.swo
