@@ -34,11 +34,11 @@ defmodule MyappWeb.Router do
     # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
-    scope "/dev" do
-      pipe_through :browser
+    scope "/api" do
+      pipe_through :api
 
-      live_dashboard "/dashboard", metrics: MyappWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      post "/users", MyappWeb.UserController, :users
+get "/getTest", MyappWeb.UserController, :get_test
     end
   end
 end

@@ -40,7 +40,7 @@ defmodule Myapp.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:mongodb, "~> 1.0"}
+      {:mongodb_driver, "~> 1.6.2"},
       {:phoenix, "~> 1.8.1"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
