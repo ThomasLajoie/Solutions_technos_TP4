@@ -8,6 +8,11 @@ defmodule Myapp.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Mongo, [
+          name: :mongo,
+          url: "mongodb://localhost:27017/my_database",
+         pool_size: 5
+       ]},
       MyappWeb.Telemetry,
       Myapp.Repo,
       {Ecto.Migrator,

@@ -7,6 +7,10 @@
 # General application configuration
 import Config
 
+config :myapp, :mongo,
+  url: "mongodb://localhost:27017/my_database",
+  pool_size: 5
+
 config :myapp,
   ecto_repos: [Myapp.Repo],
   generators: [timestamp_type: :utc_datetime]
