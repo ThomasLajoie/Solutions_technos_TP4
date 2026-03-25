@@ -1,10 +1,10 @@
-defmodule MyappWeb.UserController do
+defmodule MyappWeb.BateauController do
   use MyappWeb, :controller
 
-  def users(conn, params) do
-  case Myapp.Mongo.insert_user(params) do
+  def bateau(conn, params) do
+  case Myapp.Mongo.insert_bateau(params) do
     {:ok, _result} ->
-      json(conn, %{message: "User inserted", params: params})
+      json(conn, %{message: "Bateau inserted", params: params})
 
     {:error, reason} ->
       conn

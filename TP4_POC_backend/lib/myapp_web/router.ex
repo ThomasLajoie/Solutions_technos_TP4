@@ -37,7 +37,7 @@ defmodule MyappWeb.Router do
     scope "/api" do
       pipe_through :api
 
-      post "/users", MyappWeb.UserController, :users
+      post "/bateau", MyappWeb.BateauController, :bateau
 get "/getTest", MyappWeb.UserController, :get_test
     end
   end

@@ -17,7 +17,7 @@ defmodule Myapp.Mongo do
     {:ok, conn}
   end
 
-  def insert_user(user) do
-    Mongo.insert_one(@mongo_pool, "users", user)
+  def insert_bateau(bateau) do
+    Mongo.insert_one(@mongo_pool, "bateaux", bateau)
   end
 end
