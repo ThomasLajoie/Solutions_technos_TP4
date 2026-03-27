@@ -33,14 +33,14 @@
             margin-top: 15px;
             padding: 10px;
             width: 100%;
-            background-color: #007BFF;
+            background-color: #888888;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #777777;
         }
     </style>
 </head>
