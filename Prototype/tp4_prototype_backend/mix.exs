@@ -40,6 +40,7 @@ defmodule Tp4PrototypeBackend.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:mongodb_driver, "~> 1.6.2"},
       {:phoenix, "~> 1.8.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
