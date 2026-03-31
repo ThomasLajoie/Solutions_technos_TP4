@@ -27,7 +27,7 @@ export {};
 
 declare module "$app/types" {
 	export interface AppTypes {
-		RouteId(): "/" | "/bateaux" | "/connexion" | "/inscription";
+		RouteId(): "/" | "/bateaux" | "/connexion" | "/courses" | "/inscription" | "/series";
 		RouteParams(): {
 			
 		};
@@ -35,9 +35,11 @@ declare module "$app/types" {
 			"/": Record<string, never>;
 			"/bateaux": Record<string, never>;
 			"/connexion": Record<string, never>;
-			"/inscription": Record<string, never>
+			"/courses": Record<string, never>;
+			"/inscription": Record<string, never>;
+			"/series": Record<string, never>
 		};
-		Pathname(): "/" | "/bateaux" | "/connexion" | "/inscription";
+		Pathname(): "/" | "/bateaux" | "/connexion" | "/courses" | "/inscription" | "/series";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
 		Asset(): "/favicon.svg" | string & {};
 	}
