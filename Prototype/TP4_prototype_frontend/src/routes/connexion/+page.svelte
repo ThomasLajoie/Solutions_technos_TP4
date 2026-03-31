@@ -3,8 +3,8 @@
 <form on:submit|preventDefault={handleLogin}>
     <h2>Se connecter</h2>
 
-    <label for="email">Email</label>
-    <input type="email" id="email" bind:value={email} required>
+    <label for="username">Nom d'utilisateur</label>
+    <input type="username" id="username" bind:value={username} required>
 
     <label for="password">Mot de passe</label>
     <input type="password" id="password" bind:value={password} required>
@@ -12,23 +12,23 @@
     <button type="submit">Se connecter</button>
 </form>
 
-<a href="/register">Créer un compte</a>
+<a href="/inscription">Créer un compte</a>
 
 <script>
-    let email = '';
+    import { goto } from "$app/navigation";
+    import { isConnected } from "$lib/stores/auth";
+
+    let username = '';
     let password = '';
 
     function handleLogin() {
-        console.log('Connexion:', { email, password });
+        console.log('Connexion:', { username, password });
+        isConnected.set(true);
+        goto('/');        
     }
 </script>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f6f8;
-        padding: 20px;
-    }
 
     form {
         background: white;

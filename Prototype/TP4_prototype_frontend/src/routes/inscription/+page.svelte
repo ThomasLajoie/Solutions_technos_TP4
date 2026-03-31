@@ -3,8 +3,8 @@
 <form on:submit|preventDefault={handleRegister}>
     <h2>Créer un compte</h2>
 
-    <label for="email">Email</label>
-    <input type="email" id="email" bind:value={email} required>
+    <label for="username">Nom d'utilisateur</label>
+    <input type="username" id="username" bind:value={username} required>
 
     <label for="password">Mot de passe</label>
     <input type="password" id="password" bind:value={password} required>
@@ -15,10 +15,13 @@
     <button type="submit">S'inscrire</button>
 </form>
 
-<a href="/login">Déjà un compte ? Se connecter</a>
+<a href="/connexion">Déjà un compte ? Se connecter</a>
 
 <script>
-    let email = '';
+    import { goto } from "$app/navigation";
+    import { isConnected } from "$lib/stores/auth";
+
+    let username = '';
     let password = '';
     let confirmPassword = '';
 
@@ -27,19 +30,14 @@
             alert("Les mots de passe ne correspondent pas");
             return;
         }
-
-        console.log('Inscription:', { email, password });
+        
+        console.log('Inscription:', { username, password });
+        isConnected.set(true);
+        goto('/');    
     }
 </script>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f6f8;
-        padding: 20px;
-    }
-
-
     form {
         background: white;
         padding: 20px;
