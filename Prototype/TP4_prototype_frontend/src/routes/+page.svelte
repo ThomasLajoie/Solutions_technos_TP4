@@ -1,68 +1,31 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulaire Bateau</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            padding: 20px;
-        }
-        form {
-            background: white;
-            padding: 20px;
-            max-width: 400px;
-            margin: auto;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px;
-            width: 100%;
-            background-color: #888888;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #777777;
-        }
-    </style>
-</head>
-<body>
+<h2>Accueil</h2>
+<p>Bienvenue dans le prototype YRR.</p>
 
-<form action="http://localhost:4000/api/bateau" method="POST">
-    <h2>Informations du bateau</h2>
+<div class="cards">
+	<a class="card" href="/bateaux">Gérer les bateaux</a>
+	<a class="card" href="/courses">Gérer les courses</a>
+	<a class="card" href="/series">Gérer les séries</a>
+	<a class="card" href="/inscriptions">Voir les inscriptions</a>
+</div>
 
-    <label for="nomBateau">Nom du bateau</label>
-    <input type="text" id="nomBateau" name="nom_bateau" required>
+<style>
+	h2 {
+		margin-top: 0;
+	}
 
-    <label for="numeroVoile">Numéro de voile</label>
-    <input type="text" id="numeroVoile" name="numero_voile" required>
+	.cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 16px;
+		margin-top: 20px;
+	}
 
-    <label for="classeBateau">Classe du bateau</label>
-    <input type="text" id="classeBateau" name="classe_bateau" required>
-
-    <label for="nomBarreur">Nom du barreur</label>
-    <input type="text" id="nomBarreur" name="nom_barreur" required>
-
-    <button type="submit">Envoyer</button>
-</form>
-
-</body>
-</html>
+	.card {
+		background: white;
+		padding: 20px;
+		border-radius: 8px;
+		text-decoration: none;
+		color: black;
+		box-shadow: 0 0 10px rgba(0,0,0,0.1);
+	}
+</style>
