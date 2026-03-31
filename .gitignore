@@ -11,6 +11,15 @@ TP4_POC_frontend/.vercel
 TP4_POC_frontend/.netlify
 TP4_POC_frontend/.wrangler
 
+TP4_prototype_frontend/node_modules
+TP4_prototype_frontend/.svelte-kit
+TP4_prototype_frontend/build
+TP4_prototype_frontend/dist
+TP4_prototype_frontend/.output
+TP4_prototype_frontend/.vercel
+TP4_prototype_frontend/.netlify
+TP4_prototype_frontend/.wrangler
+
 # Vite cache
 TP4_POC_frontend/vite.config.js.timestamp-*
 TP4_POC_frontend/vite.config.ts.timestamp-*
