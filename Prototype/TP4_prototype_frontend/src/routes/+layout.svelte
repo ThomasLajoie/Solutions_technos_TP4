@@ -6,6 +6,7 @@
 	<h1>YRR Prototype</h1>
 
 	<nav>
+		<a href="/inscription">S'inscrire</a>
 		<a href="/">Accueil</a>
 		<a href="/bateaux">Bateaux</a>
 		<a href="/courses">Courses</a>
