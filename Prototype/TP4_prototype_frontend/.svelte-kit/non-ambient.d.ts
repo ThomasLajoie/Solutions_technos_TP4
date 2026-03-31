@@ -27,16 +27,17 @@ export {};
 
 declare module "$app/types" {
 	export interface AppTypes {
-		RouteId(): "/" | "/bateaux" | "/inscription";
+		RouteId(): "/" | "/bateaux" | "/connexion" | "/inscription";
 		RouteParams(): {
 			
 		};
 		LayoutParams(): {
 			"/": Record<string, never>;
 			"/bateaux": Record<string, never>;
+			"/connexion": Record<string, never>;
 			"/inscription": Record<string, never>
 		};
-		Pathname(): "/" | "/bateaux" | "/inscription";
+		Pathname(): "/" | "/bateaux" | "/connexion" | "/inscription";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
 		Asset(): "/favicon.svg" | string & {};
 	}

@@ -7,6 +7,7 @@
 
 	<nav>
 		<a href="/inscription">S'inscrire</a>
+		<a href="/connexion">Se connecter</a>
 		<a href="/">Accueil</a>
 		<a href="/bateaux">Bateaux</a>
 		<a href="/courses">Courses</a>

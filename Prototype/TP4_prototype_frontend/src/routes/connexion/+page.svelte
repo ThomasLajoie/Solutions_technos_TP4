@@ -2,16 +2,16 @@
   let email = '';
   let password = '';
 
-  function handleRegister() {
-    console.log('Inscription:', { email, password });
+  function handleLogin() {
+    console.log('Connexion:', { email, password });
 
-
+ 
   }
 </script>
 
-<h1>Inscription</h1>
+<h1>Connexion</h1>
 
-<form on:submit|preventDefault={handleRegister}>
+<form on:submit|preventDefault={handleLogin}>
   <input
     type="email"
     placeholder="Email"
@@ -26,10 +26,10 @@
     required
   />
 
-  <button type="submit">Créer un compte</button>
+  <button type="submit">Se connecter</button>
 </form>
 
-<a href="/login">Déjà un compte ? Se connecter</a>
+<a href="/register">Créer un compte</a>
 
 <style>
   form {
