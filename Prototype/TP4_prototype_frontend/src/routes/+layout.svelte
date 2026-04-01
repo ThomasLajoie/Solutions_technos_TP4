@@ -1,4 +1,5 @@
 <script>
+    import { goto } from '$app/navigation';
 	import { isConnected } from '$lib/stores/auth';
 	let { children } = $props();
 

@@ -106,6 +106,8 @@
  
 	function supprimerParticipant(boatId) {
 
+		
+
 		inscriptionsParCourse[selectedCourse.id] =
 
 			(inscriptionsParCourse[selectedCourse.id] || []).filter((id) => id !== boatId);

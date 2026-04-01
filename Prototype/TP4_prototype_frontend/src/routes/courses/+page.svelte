@@ -8,7 +8,12 @@
 			date: '2026-04-05',
 			heureDepart: '10:00',
 			parcours: 'Parcours A',
-			description: 'Course monotype pour bateaux Laser.'
+			description: 'Course monotype pour bateaux Laser.',
+			terminee: false,
+			resultats: [
+				{ id: 1, bateau: 'Sea Breeze', resultat: '', position: null },
+				{ id: 2, bateau: 'Wind Rider', resultat: '', position: null }
+			]
 		},
 		{
 			id: 2,
@@ -18,7 +23,13 @@
 			date: '2026-04-12',
 			heureDepart: '14:30',
 			parcours: 'Parcours B',
-			description: 'Course à handicap regroupant plusieurs classes.'
+			description: 'Course à handicap regroupant plusieurs classes.',
+			terminee: true,
+			resultats: [
+				{ id: 1, bateau: 'Ocean Star', resultat: '12:45:10', position: 1 },
+				{ id: 2, bateau: 'Blue Wave', resultat: '12:47:02', position: 2 },
+				{ id: 3, bateau: 'Storm Light', resultat: 'DNF', position: null }
+			]
 		},
 		{
 			id: 3,
@@ -28,7 +39,12 @@
 			date: '2026-04-19',
 			heureDepart: '09:15',
 			parcours: 'Parcours C',
-			description: 'Course de série pour la classe 420.'
+			description: 'Course de série pour la classe 420.',
+			terminee: false,
+			resultats: [
+				{ id: 1, bateau: 'Blue Wave', resultat: '', position: null },
+				{ id: 2, bateau: 'Storm Light', resultat: '', position: null }
+			]
 		}
 	];
 
@@ -36,27 +52,41 @@
 	let selectedIndex = 0;
 	let editMode = false;
 	let createMode = false;
+	let resultMode = false;
+	let filter = 'all'; // all | active | finished
 
-	function selectCourse(course, index) {
-		selectedCourse = { ...course };
-		selectedIndex = index;
+	function getFilteredCourses() {
+		if (filter === 'active') return courses.filter((course) => !course.terminee);
+		if (filter === 'finished') return courses.filter((course) => course.terminee);
+		return courses;
+	}
+
+	function findRealIndex(courseId) {
+		return courses.findIndex((course) => course.id === courseId);
+	}
+
+	function selectCourse(course) {
+		selectedCourse = structuredClone(course);
+		selectedIndex = findRealIndex(course.id);
 		editMode = false;
 		createMode = false;
+		resultMode = false;
 	}
 
 	function toggleEdit() {
-		if (createMode) return;
+		if (createMode || resultMode) return;
 
 		editMode = !editMode;
 
 		if (!editMode) {
-			selectedCourse = { ...courses[selectedIndex] };
+			selectedCourse = structuredClone(courses[selectedIndex]);
 		}
 	}
 
 	function startCreateCourse() {
 		createMode = true;
 		editMode = false;
+		resultMode = false;
 
 		selectedCourse = {
 			id: null,
@@ -66,31 +96,98 @@
 			date: '',
 			heureDepart: '',
 			parcours: '',
-			description: ''
+			description: '',
+			terminee: false,
+			resultats: []
 		};
 	}
 
 	function cancelCreate() {
 		createMode = false;
-		selectedCourse = { ...courses[selectedIndex] };
+		selectedCourse = structuredClone(courses[selectedIndex]);
 	}
 
 	function saveChanges() {
-		courses[selectedIndex] = { ...selectedCourse };
+		courses[selectedIndex] = structuredClone(selectedCourse);
 		courses = [...courses];
+		selectedCourse = structuredClone(courses[selectedIndex]);
 		editMode = false;
 	}
 
 	function createCourse() {
 		const newCourse = {
-			...selectedCourse,
+			...structuredClone(selectedCourse),
 			id: courses.length ? Math.max(...courses.map((c) => c.id)) + 1 : 1
 		};
 
 		courses = [...courses, newCourse];
 		selectedIndex = courses.length - 1;
-		selectedCourse = { ...newCourse };
+		selectedCourse = structuredClone(newCourse);
 		createMode = false;
+	}
+
+	function toggleResultsMode() {
+		if (createMode || editMode) return;
+
+		resultMode = !resultMode;
+
+		if (!resultMode) {
+			selectedCourse = structuredClone(courses[selectedIndex]);
+		}
+	}
+
+	function saveResults() {
+		if (selectedCourse.type === 'OD') {
+			recalculateODPositions();
+		}
+
+		courses[selectedIndex] = structuredClone(selectedCourse);
+		courses = [...courses];
+		selectedCourse = structuredClone(courses[selectedIndex]);
+		resultMode = false;
+	}
+
+	function recalculateODPositions() {
+		const valides = selectedCourse.resultats
+			.filter((r) => r.resultat !== '' && !isNaN(Number(r.resultat)))
+			.sort((a, b) => Number(a.resultat) - Number(b.resultat));
+
+		for (const participant of selectedCourse.resultats) {
+			participant.position = null;
+		}
+
+		valides.forEach((participant, index) => {
+			participant.position = index + 1;
+		});
+	}
+
+	function markFinished() {
+		if (selectedCourse.type === 'OD') {
+			recalculateODPositions();
+		}
+
+		selectedCourse.terminee = true;
+		courses[selectedIndex] = structuredClone(selectedCourse);
+		courses = [...courses];
+		selectedCourse = structuredClone(courses[selectedIndex]);
+		resultMode = false;
+		editMode = false;
+	}
+
+	function reopenCourse() {
+		selectedCourse.terminee = false;
+		courses[selectedIndex] = structuredClone(selectedCourse);
+		courses = [...courses];
+		selectedCourse = structuredClone(courses[selectedIndex]);
+	}
+
+	function getPodium(course) {
+		if (!course?.resultats) return [];
+
+		return [...course.resultats]
+			.filter((r) => r.position !== null && r.position !== undefined)
+			.sort((a, b) => a.position - b.position)
+			.slice(0, 3);
 	}
 </script>
 
@@ -107,31 +204,78 @@
 			</button>
 		</div>
 
-		{#each courses as course, index}
+		<div class="filters">
+			<button class:active-filter={filter === 'all'} on:click={() => (filter = 'all')}>
+				Toutes
+			</button>
+			<button class:active-filter={filter === 'active'} on:click={() => (filter = 'active')}>
+				En cours
+			</button>
+			<button class:active-filter={filter === 'finished'} on:click={() => (filter = 'finished')}>
+				Terminées
+			</button>
+		</div>
+
+		{#each getFilteredCourses() as course}
 			<button
-				class:selected={selectedIndex === index && !createMode}
+				class:selected={selectedCourse.id === course.id && !createMode}
 				class="course-button"
-				on:click={() => selectCourse(course, index)}
+				on:click={() => selectCourse(course)}
 			>
-				<strong>{course.nom}</strong>
+				<div class="course-top-row">
+					<strong>{course.nom}</strong>
+					<span class:status-finished={course.terminee} class:status-active={!course.terminee} class="status-badge">
+						{course.terminee ? 'Terminée' : 'En cours'}
+					</span>
+				</div>
 				<span>{course.date}</span>
+				<small>{course.classe}</small>
 			</button>
 		{/each}
 	</div>
 
 	<div class="right-panel">
 		<div class="header-row">
-			<h2>{createMode ? 'Créer une course' : 'Détails de la course'}</h2>
+			<h2>
+				{#if createMode}
+					Créer une course
+				{:else}
+					Détails de la course
+				{/if}
+			</h2>
 
 			{#if !createMode}
-				<button class="edit-button" on:click={toggleEdit}>
-					{editMode ? 'Annuler la modification' : 'Modifier'}
-				</button>
+				<div class="header-actions">
+					<button class="secondary-button" on:click={toggleResultsMode}>
+						{resultMode ? 'Annuler résultats' : 'Entrer / modifier les résultats'}
+					</button>
+
+					<button class="edit-button" on:click={toggleEdit} disabled={resultMode}>
+						{editMode ? 'Annuler la modification' : 'Modifier'}
+					</button>
+				</div>
 			{/if}
 		</div>
 
 		{#if selectedCourse}
 			<div class="details-card">
+				<div class="summary-banner">
+					<div>
+						<strong>État :</strong>
+						<span class:status-finished={selectedCourse.terminee} class:status-active={!selectedCourse.terminee} class="status-badge inline-badge">
+							{selectedCourse.terminee ? 'Course terminée' : 'Course non terminée'}
+						</span>
+					</div>
+
+					<div class="course-lock-note">
+						{#if selectedCourse.terminee}
+							Participants verrouillés, résultats modifiables.
+						{:else}
+							Participants modifiables, résultats à saisir après la course.
+						{/if}
+					</div>
+				</div>
+
 				<label>
 					<strong>Nom :</strong>
 					<input bind:value={selectedCourse.nom} disabled={!editMode && !createMode} />
@@ -139,7 +283,10 @@
 
 				<label>
 					<strong>Type :</strong>
-					<input bind:value={selectedCourse.type} disabled={!editMode && !createMode} />
+					<select bind:value={selectedCourse.type} disabled={!editMode && !createMode}>
+						<option value="OD">OD</option>
+						<option value="H">H</option>
+					</select>
 				</label>
 
 				<label>
@@ -167,6 +314,17 @@
 					<textarea bind:value={selectedCourse.description} disabled={!editMode && !createMode}></textarea>
 				</label>
 
+				{#if !createMode}
+					<div class="info-box">
+						<strong>Gestion des participants :</strong>
+						{#if selectedCourse.terminee}
+							Cette course est terminée. L’ajout de participants doit être bloqué dans la page Inscriptions.
+						{:else}
+							Cette course est encore ouverte. On peut encore y ajouter des participants.
+						{/if}
+					</div>
+				{/if}
+
 				{#if editMode}
 					<button class="save-button" on:click={saveChanges}>
 						Enregistrer
@@ -181,6 +339,96 @@
 						<button class="cancel-button" on:click={cancelCreate}>
 							Annuler
 						</button>
+					</div>
+				{/if}
+
+				{#if !createMode}
+					<div class="results-section">
+						<div class="results-header">
+							<h3>Résultats</h3>
+
+							<div class="results-actions">
+								{#if !selectedCourse.terminee}
+									<button class="finish-button" on:click={markFinished}>
+										Marquer comme terminée
+									</button>
+								{:else}
+									<button class="reopen-button" on:click={reopenCourse}>
+										Rouvrir la course
+									</button>
+								{/if}
+							</div>
+						</div>
+
+						<div class="podium-box">
+							<h4>Podium</h4>
+							{#if getPodium(selectedCourse).length > 0}
+								<ol>
+									{#each getPodium(selectedCourse) as participant}
+										<li>{participant.bateau}</li>
+									{/each}
+								</ol>
+							{:else}
+								<p>Aucun classement disponible pour le moment.</p>
+							{/if}
+						</div>
+
+						{#if resultMode}
+							<div class="results-edit-box">
+								<h4>Saisie / modification des résultats</h4>
+
+								<table>
+									<thead>
+										<tr>
+											<th>Bateau</th>
+											<th>Résultat saisi</th>
+											<th>Position</th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each selectedCourse.resultats as participant}
+											<tr>
+												<td>{participant.bateau}</td>
+												<td>
+													<input
+														bind:value={participant.resultat}
+														placeholder={selectedCourse.type === 'OD' ? '1, 2, 3 ou DNF' : 'HH:MM:SS ou DNF'}
+													/>
+												</td>
+												<td>{participant.position ?? '-'}</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+
+								<div class="create-actions">
+									<button class="save-button" on:click={saveResults}>
+										Enregistrer les résultats
+									</button>
+								</div>
+							</div>
+						{:else}
+							<div class="results-view-box">
+								<table>
+									<thead>
+										<tr>
+											<th>Bateau</th>
+											<th>Résultat</th>
+											<th>Position</th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each selectedCourse.resultats as participant}
+											<tr>
+												<td>{participant.bateau}</td>
+												<td>{participant.resultat || '-'}</td>
+												<td>{participant.position ?? '-'}</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -199,7 +447,7 @@
 
 	.page {
 		display: grid;
-		grid-template-columns: 320px 1fr;
+		grid-template-columns: 340px 1fr;
 		gap: 24px;
 		padding: 24px;
 		min-height: 100vh;
@@ -215,17 +463,48 @@
 	}
 
 	h1,
-	h2 {
+	h2,
+	h3,
+	h4 {
 		margin-top: 0;
 	}
 
 	.left-header,
-	.header-row {
+	.header-row,
+	.results-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: 20px;
 		gap: 10px;
+	}
+
+	.header-actions,
+	.results-actions,
+	.create-actions {
+		display: flex;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.filters {
+		display: flex;
+		gap: 8px;
+		margin-bottom: 16px;
+		flex-wrap: wrap;
+	}
+
+	.filters button {
+		padding: 8px 12px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background: white;
+		cursor: pointer;
+	}
+
+	.filters button.active-filter {
+		background: #dfe9f3;
+		border-color: #7a9bbd;
 	}
 
 	.course-button {
@@ -251,9 +530,62 @@
 		border-color: #7a9bbd;
 	}
 
-	.course-button span {
+	.course-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.course-button span,
+	.course-button small {
 		font-size: 0.9rem;
 		color: #666;
+	}
+
+	.status-badge {
+		font-size: 0.75rem;
+		padding: 4px 8px;
+		border-radius: 999px;
+		font-weight: bold;
+	}
+
+	.status-active {
+		background: #e6f6ea;
+		color: #1e7a38;
+	}
+
+	.status-finished {
+		background: #ececec;
+		color: #555;
+	}
+
+	.inline-badge {
+		margin-left: 8px;
+	}
+
+	.summary-banner,
+	.info-box,
+	.podium-box,
+	.results-edit-box,
+	.results-view-box {
+		background: #fafafa;
+		border: 1px solid #e3e3e3;
+		border-radius: 8px;
+		padding: 16px;
+	}
+
+	.summary-banner {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.course-lock-note {
+		color: #666;
+		font-size: 0.95rem;
 	}
 
 	.details-card {
@@ -269,7 +601,8 @@
 	}
 
 	input,
-	textarea {
+	textarea,
+	select {
 		padding: 10px;
 		border: 1px solid #ccc;
 		border-radius: 6px;
@@ -283,15 +616,43 @@
 	}
 
 	input:disabled,
-	textarea:disabled {
+	textarea:disabled,
+	select:disabled {
 		background: #f3f3f3;
 		color: #555;
+	}
+
+	.results-section {
+		margin-top: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		background: white;
+	}
+
+	th,
+	td {
+		border: 1px solid #ddd;
+		padding: 10px;
+		text-align: left;
+	}
+
+	th {
+		background: #f0f0f0;
 	}
 
 	.edit-button,
 	.save-button,
 	.create-button,
-	.cancel-button {
+	.cancel-button,
+	.secondary-button,
+	.finish-button,
+	.reopen-button {
 		padding: 10px 14px;
 		border: none;
 		border-radius: 6px;
@@ -300,15 +661,25 @@
 		cursor: pointer;
 	}
 
+	.secondary-button {
+		background: #4f78a8;
+	}
+
+	.finish-button {
+		background: #2c8f5a;
+	}
+
+	.reopen-button {
+		background: #b07a2a;
+	}
+
 	.edit-button:hover,
 	.save-button:hover,
 	.create-button:hover,
-	.cancel-button:hover {
-		background: #5d5d5d;
-	}
-
-	.create-actions {
-		display: flex;
-		gap: 12px;
+	.cancel-button:hover,
+	.secondary-button:hover,
+	.finish-button:hover,
+	.reopen-button:hover {
+		filter: brightness(0.95);
 	}
 </style>
