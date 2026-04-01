@@ -16,6 +16,7 @@
     <input type="text" id="nomBarreur" name="nom_barreur" required>
 
     <button type="submit">Envoyer</button>
+
 </form>
 
   <style>
