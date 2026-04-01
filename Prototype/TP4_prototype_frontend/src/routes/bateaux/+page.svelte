@@ -155,8 +155,8 @@ function ajouterBateau(){
             noVoile: numeroVoile,
             classe: classeBateau,
             NomBarreur: nomBarreur
-    })
-    bateaux = bateaux
+    });
+    bateaux = bateaux;
 
     nomBateau = '';
     numeroVoile = '';

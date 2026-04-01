@@ -120,10 +120,13 @@
 			id: courses.length ? Math.max(...courses.map((c) => c.id)) + 1 : 1
 		};
 
+		newCourse.terminee = false;
 		courses = [...courses, newCourse];
 		selectedIndex = courses.length - 1;
 		selectedCourse = structuredClone(newCourse);
 		createMode = false;
+		console.log(courses);
+		courses=courses;
 	}
 
 	function toggleResultsMode() {
@@ -204,19 +207,7 @@
 			</button>
 		</div>
 
-		<div class="filters">
-			<button class:active-filter={filter === 'all'} on:click={() => (filter = 'all')}>
-				Toutes
-			</button>
-			<button class:active-filter={filter === 'active'} on:click={() => (filter = 'active')}>
-				En cours
-			</button>
-			<button class:active-filter={filter === 'finished'} on:click={() => (filter = 'finished')}>
-				Terminées
-			</button>
-		</div>
-
-		{#each getFilteredCourses() as course}
+		{#each courses as course}
 			<button
 				class:selected={selectedCourse.id === course.id && !createMode}
 				class="course-button"
