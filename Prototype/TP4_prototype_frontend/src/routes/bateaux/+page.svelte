@@ -183,6 +183,7 @@ function ajouterBateau(){
 	<input type="text" id="nomBarreur" bind:value={nomBarreur} required />
 
     <button type="submit">Envoyer</button>
+
 </form>
 
 <h2>Liste des bateaux</h2>
