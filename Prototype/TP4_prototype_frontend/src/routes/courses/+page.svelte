@@ -478,26 +478,6 @@
 		flex-wrap: wrap;
 	}
 
-	.filters {
-		display: flex;
-		gap: 8px;
-		margin-bottom: 16px;
-		flex-wrap: wrap;
-	}
-
-	.filters button {
-		padding: 8px 12px;
-		border: 1px solid #ccc;
-		border-radius: 6px;
-		background: white;
-		cursor: pointer;
-	}
-
-	.filters button.active-filter {
-		background: #dfe9f3;
-		border-color: #7a9bbd;
-	}
-
 	.course-button {
 		width: 100%;
 		text-align: left;

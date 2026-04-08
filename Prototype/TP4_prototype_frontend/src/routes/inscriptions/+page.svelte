@@ -4,8 +4,6 @@
 
 		{ id: 1, nom: 'Course 1', date: '2026-04-05', classe: 'Laser' },
 
-		{ id: 2, nom: 'Course 2', date: '2026-04-12', classe: 'Open Handicap' },
-
 		{ id: 3, nom: 'Course 3', date: '2026-04-19', classe: '420' }
 
 	];
