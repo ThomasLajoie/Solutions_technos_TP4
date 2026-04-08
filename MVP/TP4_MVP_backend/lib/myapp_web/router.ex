@@ -34,11 +34,19 @@ defmodule MyappWeb.Router do
     # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
-    scope "/api" do
-      pipe_through :api
+    scope "/api", MyappWeb do
+  pipe_through :api
 
-      post "/bateau", MyappWeb.BateauController, :bateau
-get "/getTest", MyappWeb.UserController, :get_test
-    end
+  post "/register", UserController, :register
+  post "/login", UserController, :login
+
+  post "/addboat", BoatController, :add_boat
+  get "/getboats", BoatController, :get_boats
+
+  post "/addrace", RaceController, :add_race
+  get "/getraces", RaceController, :get_races
+
+  get "/getTest", UserController, :get_test
+end
   end
 end

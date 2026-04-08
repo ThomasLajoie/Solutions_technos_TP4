@@ -45,6 +45,14 @@ TP4_POC_backend/priv/static/cache_manifest.json
 # Uploads
 TP4_POC_backend/priv/static/uploads
 
+# New backend: TP4_MVP_backend
+TP4_MVP_backend/_build
+TP4_MVP_backend/deps
+TP4_MVP_backend/cover
+TP4_MVP_backend/priv/static/assets
+TP4_MVP_backend/priv/static/cache_manifest.json
+TP4_MVP_backend/priv/static/uploads
+
 # Erlang crash dumps
 erl_crash.dump
 
