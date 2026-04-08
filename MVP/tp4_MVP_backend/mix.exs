@@ -1,9 +1,9 @@
-defmodule Tp4PrototypeBackend.MixProject do
+defmodule Myapp.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :tp4_prototype_backend,
+      app: :myapp,
       version: "0.1.0",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -20,7 +20,7 @@ defmodule Tp4PrototypeBackend.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Tp4PrototypeBackend.Application, []},
+      mod: {Myapp.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -41,7 +41,10 @@ defmodule Tp4PrototypeBackend.MixProject do
   defp deps do
     [
       {:mongodb_driver, "~> 1.6.2"},
-      {:phoenix, "~> 1.8.5"},
+      {:phoenix, "~> 1.8.1"},
+      {:phoenix_ecto, "~> 4.5"},
+      {:ecto_sql, "~> 3.13"},
+      {:ecto_sqlite3, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.1.0"},
@@ -60,7 +63,7 @@ defmodule Tp4PrototypeBackend.MixProject do
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 1.0"},
+      {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"}
@@ -75,15 +78,18 @@ defmodule Tp4PrototypeBackend.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind tp4_prototype_backend", "esbuild tp4_prototype_backend"],
+      "assets.build": ["compile", "tailwind myapp", "esbuild myapp"],
       "assets.deploy": [
-        "tailwind tp4_prototype_backend --minify",
-        "esbuild tp4_prototype_backend --minify",
+        "tailwind myapp --minify",
+        "esbuild myapp --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
     ]
   end
 end

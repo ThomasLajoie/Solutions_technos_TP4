@@ -114,20 +114,40 @@
 		editMode = false;
 	}
 
-	function createCourse() {
+	async function createCourse() {
+	try {
 		const newCourse = {
 			...structuredClone(selectedCourse),
-			id: courses.length ? Math.max(...courses.map((c) => c.id)) + 1 : 1
+			id: courses.length ? Math.max(...courses.map((c) => c.id)) + 1 : 1,
+			terminee: false
 		};
 
-		newCourse.terminee = false;
-		courses = [...courses, newCourse];
+		const response = await fetch('http://localhost:4000/api/course', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(newCourse)
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur lors de la création de la course');
+		}
+
+		const savedCourse = await response.json();
+
+		courses = [...courses, savedCourse];
 		selectedIndex = courses.length - 1;
-		selectedCourse = structuredClone(newCourse);
+		selectedCourse = structuredClone(savedCourse);
 		createMode = false;
-		console.log(courses);
-		courses=courses;
+
+		console.log('Course créée en DB:', savedCourse);
+
+	} catch (error) {
+		console.error(error);
+		alert('Erreur lors de la création de la course');
 	}
+}
 
 	function toggleResultsMode() {
 		if (createMode || editMode) return;

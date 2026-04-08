@@ -167,7 +167,7 @@ function ajouterBateau(){
 
 <h2>Ajouter un bateau</h2>
 
-<form /*action="http://localhost:4000/api/bateau" method="POST"*/ on:submit|preventDefault={ajouterBateau}>
+<form action="http://localhost:4000/api/bateau" method="POST" on:submit|preventDefault={ajouterBateau}>
     <h2>Informations du bateau</h2>
 
     <label for="nomBateau">Nom du bateau</label>

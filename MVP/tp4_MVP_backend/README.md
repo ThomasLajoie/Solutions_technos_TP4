@@ -1,4 +1,4 @@
-# Tp4PrototypeBackend
+# Myapp
 
 To start your Phoenix server:
 

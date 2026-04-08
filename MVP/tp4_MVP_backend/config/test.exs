@@ -1,14 +1,24 @@
 import Config
 
+# Configure your database
+#
+# The MIX_TEST_PARTITION environment variable can be used
+# to provide built-in test partitioning in CI environment.
+# Run `mix help test` for more information.
+config :myapp, Myapp.Repo,
+  database: Path.expand("../myapp_test.db", __DIR__),
+  pool_size: 5,
+  pool: Ecto.Adapters.SQL.Sandbox
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :tp4_prototype_backend, Tp4PrototypeBackendWeb.Endpoint,
+config :myapp, MyappWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "jlBRilC6X2yQ9c5vRI4DhbWVf3eHflcNLhemGt8ODNW0dp+Rag1z3KhnZdeANcE7",
+  secret_key_base: "TT5i7EjIL/8Ot2B+pXqPMkG7nF5cl7SP6zvBTcfHAKRfJg+1YO2zU3ajupLPZEPm",
   server: false
 
 # In test we don't send emails
-config :tp4_prototype_backend, Tp4PrototypeBackend.Mailer, adapter: Swoosh.Adapters.Test
+config :myapp, Myapp.Mailer, adapter: Swoosh.Adapters.Test
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
@@ -22,7 +32,3 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
-
-# Sort query params output of verified routes for robust url comparisons
-config :phoenix,
-  sort_verified_routes_query_params: true
