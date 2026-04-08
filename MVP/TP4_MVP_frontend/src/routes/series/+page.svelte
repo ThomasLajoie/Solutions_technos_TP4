@@ -1,3 +1,5 @@
+import { onMount } from 'svelte';
+
 <script>
 	let seriesList = [
 		{
@@ -33,6 +35,31 @@
 	let selectedIndex = 0;
 	let editMode = false;
 	let createMode = false;
+
+onMount(async () => {
+	try {
+		const response = await fetch('http://localhost:4000/api/geteries');
+
+		if (!response.ok) {
+			throw new Error('Erreur chargement séries');
+		}
+
+		const data = await response.json();
+
+		seriesList = data;
+
+		if (seriesList.length > 0) {
+			selectedSerie = { ...seriesList[0] };
+			selectedIndex = 0;
+		}
+
+		console.log('Séries chargées:', data);
+
+	} catch (error) {
+		console.error(error);
+		alert('Erreur lors du chargement des séries');
+	}
+});
 
 	function selectSerie(serie, index) {
 		selectedSerie = { ...serie };
@@ -77,17 +104,38 @@
 		selectedSerie = { ...seriesList[selectedIndex] };
 	}
 
-	function createSerie() {
+	async function createSerie() {
+	try {
 		const newSerie = {
-			...selectedSerie,
-			id: seriesList.length ? Math.max(...seriesList.map((s) => s.id)) + 1 : 1
+			...selectedSerie
 		};
 
-		seriesList = [...seriesList, newSerie];
+		const response = await fetch('http://localhost:4000/api/series', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(newSerie)
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur lors de la création de la série');
+		}
+
+		const savedSerie = await response.json();
+
+		seriesList = [...seriesList, savedSerie];
 		selectedIndex = seriesList.length - 1;
-		selectedSerie = { ...newSerie };
+		selectedSerie = { ...savedSerie };
 		createMode = false;
+
+		console.log('Série créée:', savedSerie);
+
+	} catch (error) {
+		console.error(error);
+		alert('Erreur lors de la création de la série');
 	}
+}
 </script>
 
 <svelte:head>

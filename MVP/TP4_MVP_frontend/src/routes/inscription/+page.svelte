@@ -1,6 +1,6 @@
 <h2>Inscription</h2>
 
-<form on:submit|preventDefault={handleRegister}>
+<form action='http://localhost:4000/api/inscription' method='POST' on:submit|preventDefault={handleRegister}>
     <h2>Créer un compte</h2>
 
     <label for="username">Nom d'utilisateur</label>

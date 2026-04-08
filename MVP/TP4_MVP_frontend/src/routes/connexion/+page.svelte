@@ -1,6 +1,6 @@
 <h2>Connexion</h2>
 
-<form on:submit|preventDefault={handleLogin}>
+<form action='http://localhost:4000/api/connexion' method='POST' on:submit|preventDefault={handleLogin}>
     <h2>Se connecter</h2>
 
     <label for="username">Nom d'utilisateur</label>
