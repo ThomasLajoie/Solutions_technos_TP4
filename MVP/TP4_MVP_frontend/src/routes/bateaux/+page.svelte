@@ -1,173 +1,76 @@
+
+
 <script>
-   let bateaux = [
-	{
-		id: 1,
-		nom: "Le Gargantuesque",
-		noVoile: 123,
-		classe: "Cool",
-		NomBarreur: "Dédé Fortin"
-	},
-	{
-		id: 2,
-		nom: "Le Bateau",
-		noVoile: 456,
-		classe: "Bato",
-		NomBarreur: "Phil Collins"
-	},
-	{
-		id: 3,
-		nom: "L'Écume",
-		noVoile: 789,
-		classe: "Laser",
-		NomBarreur: "Jean Tremblay"
-	},
-	{
-		id: 4,
-		nom: "Vent du Nord",
-		noVoile: 321,
-		classe: "420",
-		NomBarreur: "Marie Gagnon"
-	},
-	{
-		id: 5,
-		nom: "Le Marlin Bleu",
-		noVoile: 654,
-		classe: "Open",
-		NomBarreur: "Luc Bouchard"
-	},
-	{
-		id: 6,
-		nom: "Tempête Douce",
-		noVoile: 987,
-		classe: "Laser",
-		NomBarreur: "Sophie Roy"
-	},
-	{
-		id: 7,
-		nom: "Le Flibustier",
-		noVoile: 147,
-		classe: "Cool",
-		NomBarreur: "André Lavoie"
-	},
-	{
-		id: 8,
-		nom: "Aurore Marine",
-		noVoile: 258,
-		classe: "420",
-		NomBarreur: "Julie Caron"
-	},
-	{
-		id: 9,
-		nom: "Éclair des Mers",
-		noVoile: 369,
-		classe: "Bato",
-		NomBarreur: "Marc Bélanger"
-	},
-	{
-		id: 10,
-		nom: "Le Corsaire",
-		noVoile: 159,
-		classe: "Open",
-		NomBarreur: "Nicolas Pelletier"
-	},
-	{
-		id: 11,
-		nom: "Brise Salée",
-		noVoile: 753,
-		classe: "Laser",
-		NomBarreur: "Camille Morin"
-	},
-	{
-		id: 12,
-		nom: "Le Vif Argent",
-		noVoile: 852,
-		classe: "420",
-		NomBarreur: "Olivier Côté"
-	},
-	{
-		id: 13,
-		nom: "Grand Large",
-		noVoile: 951,
-		classe: "Cool",
-		NomBarreur: "Patrick Simard"
-	},
-	{
-		id: 14,
-		nom: "Le Goéland",
-		noVoile: 741,
-		classe: "Bato",
-		NomBarreur: "Isabelle Fournier"
-	},
-	{
-		id: 15,
-		nom: "Onde Vive",
-		noVoile: 963,
-		classe: "Laser",
-		NomBarreur: "Éric Dufresne"
-	},
-	{
-		id: 16,
-		nom: "Le Capitaine",
-		noVoile: 357,
-		classe: "Open",
-		NomBarreur: "Hugo Paquette"
-	},
-	{
-		id: 17,
-		nom: "Perle Marine",
-		noVoile: 8524,
-		classe: "420",
-		NomBarreur: "Valérie Nadeau"
-	},
-	{
-		id: 18,
-		nom: "Lame d'Eau",
-		noVoile: 4567,
-		classe: "Cool",
-		NomBarreur: "Antoine Gervais"
-	},
-	{
-		id: 19,
-		nom: "Le Dauphin",
-		noVoile: 2145,
-		classe: "Bato",
-		NomBarreur: "Karine Lévesque"
-	},
-	{
-		id: 20,
-		nom: "Horizon Bleu",
-		noVoile: 6789,
-		classe: "Open",
-		NomBarreur: "Mathieu Cloutier"
+import { onMount } from 'svelte';
+
+let bateaux = [];
+
+   onMount(async () => {
+	try {
+		const response = await fetch('http://localhost:4000/api/getboats');
+
+		if (!response.ok) {
+			throw new Error('Erreur chargement séries');
+		}
+
+		const data = await response.json();
+
+		bateaux = data;
+
+	
+
+		console.log('Bateaux chargées:', data);
+
+	} catch (error) {
+		console.error(error);
+		alert('Erreur lors du chargement des bateaux');
 	}
-];
+});
 
 let nomBateau = '';
 	let numeroVoile = '';
 	let classeBateau = '';
 	let nomBarreur = '';
 
-function ajouterBateau(){
+async function ajouterBateau() {
+	try {
+		const response = await fetch('http://localhost:4000/api/addboat', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				nomBateau,
+				numeroVoile,
+				classeBateau,
+				nomBarreur
+			})
+		});
 
-    bateaux.push({
-            id: bateaux.length + 1,
-            nom: nomBateau,
-            noVoile: numeroVoile,
-            classe: classeBateau,
-            NomBarreur: nomBarreur
-    });
-    bateaux = bateaux;
+		if (!response.ok) {
+			throw new Error('Erreur ajout bateau');
+		}
 
-    nomBateau = '';
-    numeroVoile = '';
-    classeBateau = '';
-    nomBarreur = '';
+		// 🔄 reload liste
+		const res = await fetch('http://localhost:4000/api/getboats');
+		bateaux = await res.json();
+
+		// reset form
+		nomBateau = '';
+		numeroVoile = '';
+		classeBateau = '';
+		nomBarreur = '';
+
+	} catch (error) {
+		console.error(error);
+		alert('Erreur lors de l’ajout du bateau');
+	}
 }
 </script>
 
 <h2>Ajouter un bateau</h2>
 
-<form action="http://localhost:4000/api/bateau" method="POST" on:submit|preventDefault={ajouterBateau}>
+<form on:submit|preventDefault={ajouterBateau}>
     <h2>Informations du bateau</h2>
 
     <label for="nomBateau">Nom du bateau</label>

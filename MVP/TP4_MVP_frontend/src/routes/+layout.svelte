@@ -26,7 +26,7 @@
 	<nav>
 		<a href="/bateaux">Bateaux</a>
 		<a href="/courses">Courses</a>
-		<a href="/series">Séries</a>
+	 <!--<a href="/series">Séries</a>-->	
 		<a href="/inscriptions">Inscriptions</a>
 		<!-- svelte-ignore event_directive_deprecated -->
 		<button on:click={logout}>Déconnexion</button>

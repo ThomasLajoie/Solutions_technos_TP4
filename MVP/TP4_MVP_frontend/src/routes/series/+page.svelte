@@ -38,7 +38,7 @@ import { onMount } from 'svelte';
 
 onMount(async () => {
 	try {
-		const response = await fetch('http://localhost:4000/api/geteries');
+		const response = await fetch('http://localhost:4000/api/getSeries');
 
 		if (!response.ok) {
 			throw new Error('Erreur chargement séries');
