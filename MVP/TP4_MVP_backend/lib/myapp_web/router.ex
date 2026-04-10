@@ -37,6 +37,9 @@ end
     post "/addrace", RaceController, :add_race
     get "/getraces", RaceController, :get_races
 
+    post "/addparticipanttorace", RaceController, :add_participant_to_race
+  get "/getparticipantsforrace/:race_id", RaceController, :get_participants_for_race
+
     get "/getTest", UserController, :get_test
   end
 
