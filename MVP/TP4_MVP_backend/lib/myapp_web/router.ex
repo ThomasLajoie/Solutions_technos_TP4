@@ -11,14 +11,8 @@ defmodule MyappWeb.Router do
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
-
-    plug CORSPlug,
-      origin: ["http://localhost:5173"],
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      headers: ["Content-Type", "Authorization", "Accept"],
-      max_age: 86400
-  end
+  plug :accepts, ["json"]
+end
 
   scope "/", MyappWeb do
     pipe_through :browser
