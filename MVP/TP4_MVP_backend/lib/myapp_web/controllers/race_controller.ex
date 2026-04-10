@@ -7,13 +7,15 @@ defmodule MyappWeb.RaceController do
   # POST /api/addrace
   def add_race(conn, params) do
     with {:ok, name} <- Map.fetch(params, "name"),
-         {:ok, location} <- Map.fetch(params, "location"),
          {:ok, date} <- Map.fetch(params, "date") do
-
       race = %{
         name: name,
-        location: location,
+        type: Map.get(params, "type", "OD"),
+        class: Map.get(params, "class", ""),
         date: date,
+        start_time: Map.get(params, "start_time", ""),
+        course: Map.get(params, "course", ""),
+        description: Map.get(params, "description", ""),
         finished: false,
         participants: []
       }
@@ -22,11 +24,10 @@ defmodule MyappWeb.RaceController do
         {:ok, result} ->
           json(conn, %{
             message: "Race added",
-            id: result.inserted_id
+            id: object_id_to_string(result.inserted_id)
           })
 
         {:error, reason} ->
-          IO.inspect(reason, label: "MONGO ERROR")
           conn
           |> put_status(500)
           |> json(%{error: inspect(reason)})
@@ -35,7 +36,7 @@ defmodule MyappWeb.RaceController do
       :error ->
         conn
         |> put_status(400)
-        |> json(%{error: "Missing parameters (name, location, date)"})
+        |> json(%{error: "Missing parameters (name, date)"})
     end
   end
 
@@ -43,9 +44,100 @@ defmodule MyappWeb.RaceController do
   def get_races(conn, _params) do
     races =
       Mongo.find(:mongo, @collection, %{})
-      |> Enum.to_list()
+      |> Enum.map(&serialize_race/1)
 
     json(conn, races)
+  end
+
+  # PUT /api/updaterace/:race_id
+  def update_race(conn, %{"race_id" => race_id} = params) do
+    with {:ok, object_id} <- decode_object_id(race_id),
+         {:ok, _race} <- get_race_by_id(object_id) do
+      updates = %{
+        "name" => Map.get(params, "name", ""),
+        "type" => Map.get(params, "type", "OD"),
+        "class" => Map.get(params, "class", ""),
+        "date" => Map.get(params, "date", ""),
+        "start_time" => Map.get(params, "start_time", ""),
+        "course" => Map.get(params, "course", ""),
+        "description" => Map.get(params, "description", "")
+      }
+
+      case Mongo.update_one(
+             :mongo,
+             @collection,
+             %{"_id" => object_id},
+             %{"$set" => updates}
+           ) do
+        {:ok, _} ->
+          json(conn, %{message: "Race updated"})
+
+        {:error, reason} ->
+          conn
+          |> put_status(500)
+          |> json(%{error: inspect(reason)})
+      end
+    else
+      {:error, :invalid_object_id} ->
+        conn |> put_status(400) |> json(%{error: "Invalid race_id"})
+
+      {:error, :race_not_found} ->
+        conn |> put_status(404) |> json(%{error: "Race not found"})
+    end
+  end
+
+  # PUT /api/setracefinished/:race_id
+  def set_race_finished(conn, %{"race_id" => race_id, "finished" => finished}) do
+    with {:ok, object_id} <- decode_object_id(race_id),
+         {:ok, _race} <- get_race_by_id(object_id) do
+      case Mongo.update_one(
+             :mongo,
+             @collection,
+             %{"_id" => object_id},
+             %{"$set" => %{"finished" => finished}}
+           ) do
+        {:ok, _} ->
+          json(conn, %{message: "Race status updated", finished: finished})
+
+        {:error, reason} ->
+          conn
+          |> put_status(500)
+          |> json(%{error: inspect(reason)})
+      end
+    else
+      {:error, :invalid_object_id} ->
+        conn |> put_status(400) |> json(%{error: "Invalid race_id"})
+
+      {:error, :race_not_found} ->
+        conn |> put_status(404) |> json(%{error: "Race not found"})
+    end
+  end
+
+  # PUT /api/updateraceresults/:race_id
+  def update_race_results(conn, %{"race_id" => race_id, "participants" => participants}) do
+    with {:ok, object_id} <- decode_object_id(race_id),
+         {:ok, _race} <- get_race_by_id(object_id) do
+      case Mongo.update_one(
+             :mongo,
+             @collection,
+             %{"_id" => object_id},
+             %{"$set" => %{"participants" => participants}}
+           ) do
+        {:ok, _} ->
+          json(conn, %{message: "Race results updated"})
+
+        {:error, reason} ->
+          conn
+          |> put_status(500)
+          |> json(%{error: inspect(reason)})
+      end
+    else
+      {:error, :invalid_object_id} ->
+        conn |> put_status(400) |> json(%{error: "Invalid race_id"})
+
+      {:error, :race_not_found} ->
+        conn |> put_status(404) |> json(%{error: "Race not found"})
+    end
   end
 
   # POST /api/addparticipanttorace
@@ -60,7 +152,6 @@ defmodule MyappWeb.RaceController do
          {:ok, race} <- get_race_by_id(object_id),
          :ok <- ensure_race_not_finished(race),
          :ok <- ensure_participant_not_already_registered(race, boat_id, sail_number) do
-
       participant = %{
         id: generate_participant_id(),
         boat_id: boat_id,
@@ -74,31 +165,24 @@ defmodule MyappWeb.RaceController do
         inserted_at: DateTime.utc_now() |> DateTime.to_iso8601()
       }
 
-      filter = %{"_id" => object_id}
-
-      update = %{
-        "$push" => %{
-          "participants" => participant
-        }
-      }
-
-      case Mongo.update_one(:mongo, @collection, filter, update) do
+      case Mongo.update_one(
+             :mongo,
+             @collection,
+             %{"_id" => object_id},
+             %{"$push" => %{"participants" => participant}}
+           ) do
         {:ok, %{matched_count: 0}} ->
-          conn
-          |> put_status(404)
-          |> json(%{error: "Race not found"})
+          conn |> put_status(404) |> json(%{error: "Race not found"})
 
         {:ok, _result} ->
           json(conn, %{
             message: "Participant added to race",
             race_id: race_id,
-            participant: participant
+            participant: serialize_participant(participant)
           })
 
         {:error, reason} ->
-          conn
-          |> put_status(500)
-          |> json(%{error: inspect(reason)})
+          conn |> put_status(500) |> json(%{error: inspect(reason)})
       end
     else
       :error ->
@@ -110,49 +194,76 @@ defmodule MyappWeb.RaceController do
         })
 
       {:error, :invalid_object_id} ->
-        conn
-        |> put_status(400)
-        |> json(%{error: "Invalid race_id"})
+        conn |> put_status(400) |> json(%{error: "Invalid race_id"})
 
       {:error, :race_not_found} ->
-        conn
-        |> put_status(404)
-        |> json(%{error: "Race not found"})
+        conn |> put_status(404) |> json(%{error: "Race not found"})
 
       {:error, :race_finished} ->
-        conn
-        |> put_status(400)
-        |> json(%{error: "Cannot add participant to a finished race"})
+        conn |> put_status(400) |> json(%{error: "Cannot add participant to a finished race"})
 
       {:error, :participant_already_registered} ->
-        conn
-        |> put_status(409)
-        |> json(%{error: "Participant already registered for this race"})
+        conn |> put_status(409) |> json(%{error: "Participant already registered for this race"})
 
       {:error, reason} ->
-        conn
-        |> put_status(500)
-        |> json(%{error: inspect(reason)})
+        conn |> put_status(500) |> json(%{error: inspect(reason)})
     end
   end
 
+  # GET /api/getparticipantsforrace/:race_id
   def get_participants_for_race(conn, %{"race_id" => race_id}) do
-  with {:ok, object_id} <- decode_object_id(race_id),
-       {:ok, race} <- get_race_by_id(object_id) do
-    participants = Map.get(race, "participants", [])
-    json(conn, participants)
-  else
-    {:error, :invalid_object_id} ->
-      conn
-      |> put_status(400)
-      |> json(%{error: "Invalid race_id"})
+    with {:ok, object_id} <- decode_object_id(race_id),
+         {:ok, race} <- get_race_by_id(object_id) do
+      participants =
+        race
+        |> Map.get("participants", [])
+        |> Enum.map(&serialize_participant/1)
 
-    {:error, :race_not_found} ->
-      conn
-      |> put_status(404)
-      |> json(%{error: "Race not found"})
+      json(conn, participants)
+    else
+      {:error, :invalid_object_id} ->
+        conn |> put_status(400) |> json(%{error: "Invalid race_id"})
+
+      {:error, :race_not_found} ->
+        conn |> put_status(404) |> json(%{error: "Race not found"})
+    end
   end
-end
+
+  defp serialize_race(race) do
+    %{
+      id: object_id_to_string(race["_id"]),
+      name: race["name"] || "",
+      type: race["type"] || "OD",
+      class: race["class"] || "",
+      date: race["date"] || "",
+      start_time: race["start_time"] || "",
+      course: race["course"] || "",
+      description: race["description"] || "",
+      finished: Map.get(race, "finished", false),
+      participants: Enum.map(Map.get(race, "participants", []), &serialize_participant/1)
+    }
+  end
+
+  defp serialize_participant(participant) do
+    %{
+      id: participant["id"] || participant[:id],
+      boat_id: participant["boat_id"] || participant[:boat_id],
+      boat_name: participant["boat_name"] || participant[:boat_name] || "",
+      sail_number: participant["sail_number"] || participant[:sail_number] || "",
+      boat_class: participant["boat_class"] || participant[:boat_class] || "",
+      helm_name: participant["helm_name"] || participant[:helm_name] || "",
+      result: participant["result"] || participant[:result],
+      position: participant["position"] || participant[:position],
+      points: participant["points"] || participant[:points],
+      inserted_at: participant["inserted_at"] || participant[:inserted_at]
+    }
+  end
+
+  defp object_id_to_string(%BSON.ObjectId{} = object_id) do
+    BSON.ObjectId.encode!(object_id)
+  end
+
+  defp object_id_to_string(value), do: value
 
   defp decode_object_id(id) when is_binary(id) do
     try do
@@ -182,7 +293,8 @@ end
 
     already_exists =
       Enum.any?(participants, fn participant ->
-        participant["boat_id"] == boat_id or participant["sail_number"] == sail_number
+        (participant["boat_id"] || participant[:boat_id]) == boat_id or
+          (participant["sail_number"] || participant[:sail_number]) == sail_number
       end)
 
     if already_exists do

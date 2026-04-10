@@ -11,20 +11,20 @@ defmodule MyappWeb.Router do
   end
 
   pipeline :api do
-  plug :accepts, ["json"]
-  plug CORSPlug,
-    origin: ["http://localhost:5173"], # ton front dev
-    methods: ["GET", "POST", "OPTIONS"], # autorise POST/GET et preflight
-    headers: ["Content-Type", "Authorization", "Accept"],
-    max_age: 86400
-end
+    plug :accepts, ["json"]
+
+    plug CORSPlug,
+      origin: ["http://localhost:5173"],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      headers: ["Content-Type", "Authorization", "Accept"],
+      max_age: 86400
+  end
 
   scope "/", MyappWeb do
     pipe_through :browser
     get "/", PageController, :home
   end
 
-  # Routes API toujours accessibles et protégées par CORSPlug
   scope "/api", MyappWeb do
     pipe_through :api
 
@@ -36,16 +36,17 @@ end
 
     post "/addrace", RaceController, :add_race
     get "/getraces", RaceController, :get_races
+    put "/updaterace/:race_id", RaceController, :update_race
+    put "/setracefinished/:race_id", RaceController, :set_race_finished
+    put "/updateraceresults/:race_id", RaceController, :update_race_results
 
     post "/addparticipanttorace", RaceController, :add_participant_to_race
-  get "/getparticipantsforrace/:race_id", RaceController, :get_participants_for_race
+    get "/getparticipantsforrace/:race_id", RaceController, :get_participants_for_race
 
     get "/getTest", UserController, :get_test
   end
 
-  # LiveDashboard & Swoosh uniquement en dev
   if Application.compile_env(:myapp, :dev_routes) do
     import Phoenix.LiveDashboard.Router
-    # ton dashboard ici
   end
 end

@@ -4,8 +4,7 @@ defmodule MyappWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_myapp_key",
-    signing_salt: "jOc5vJLg",
-    same_site: "Lax"
+    signing_salt: "change_me"
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
@@ -15,7 +14,7 @@ defmodule MyappWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :myapp,
-    gzip: not code_reloading?,
+    gzip: false,
     only: MyappWeb.static_paths()
 
   if code_reloading? do
@@ -29,6 +28,12 @@ defmodule MyappWeb.Endpoint do
     param_key: "request_logger",
     cookie_key: "request_logger"
 
+  plug CORSPlug,
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    headers: ["Content-Type", "Authorization", "Accept"],
+    max_age: 86400
+
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
@@ -40,13 +45,5 @@ defmodule MyappWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-
-  # --- AJOUT DU CORSPLUG ICI ---
-  plug CORSPlug,
-    origin: ["http://localhost:5173"],   # ton frontend
-    methods: ["GET", "POST", "OPTIONS"], # inclut OPTIONS pour preflight
-    headers: ["Content-Type", "Authorization", "Accept"],
-    max_age: 86400
-
   plug MyappWeb.Router
 end
