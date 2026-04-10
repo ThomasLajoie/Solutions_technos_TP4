@@ -334,7 +334,7 @@
 				</div>
 			{/if}
 		{:else}
-			<p>Aucune course sélectionnée.</p>
+			<p>Aucune course sélectionnée. Créez au moins une course pour utiliser cette page.</p>
 		{/if}
 	</div>
 </div>
