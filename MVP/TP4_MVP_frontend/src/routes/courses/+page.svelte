@@ -1,52 +1,33 @@
 <script>
-	let courses = [
-		{
-			id: 1,
-			nom: 'Course 1',
-			type: 'OD',
-			classe: 'Laser',
-			date: '2026-04-05',
-			heureDepart: '10:00',
-			parcours: 'Parcours A',
-			description: 'Course monotype pour bateaux Laser.',
-			terminee: false,
-			resultats: [
-				{ id: 1, bateau: 'Sea Breeze', resultat: '', position: null },
-				{ id: 2, bateau: 'Wind Rider', resultat: '', position: null }
-			]
-		},
-		{
-			id: 2,
-			nom: 'Course 2',
-			type: 'H',
-			classe: 'Open Handicap',
-			date: '2026-04-12',
-			heureDepart: '14:30',
-			parcours: 'Parcours B',
-			description: 'Course à handicap regroupant plusieurs classes.',
-			terminee: true,
-			resultats: [
-				{ id: 1, bateau: 'Ocean Star', resultat: '12:45:10', position: 1 },
-				{ id: 2, bateau: 'Blue Wave', resultat: '12:47:02', position: 2 },
-				{ id: 3, bateau: 'Storm Light', resultat: 'DNF', position: null }
-			]
-		},
-		{
-			id: 3,
-			nom: 'Course 3',
-			type: 'OD',
-			classe: '420',
-			date: '2026-04-19',
-			heureDepart: '09:15',
-			parcours: 'Parcours C',
-			description: 'Course de série pour la classe 420.',
-			terminee: false,
-			resultats: [
-				{ id: 1, bateau: 'Blue Wave', resultat: '', position: null },
-				{ id: 2, bateau: 'Storm Light', resultat: '', position: null }
-			]
+import {onMount} from 'svelte';
+
+onMount(async () => {
+	try {
+		const res = await fetch('http://localhost:4000/api/getraces');
+		const data = await res.json();
+
+		courses = data.map(r => ({
+	id: r._id.$oid || r._id, 
+	nom: r.name,
+	parcours: r.location,
+	date: r.date,
+	type: 'OD',
+	classe: '',
+	heureDepart: '',
+	description: '',
+	terminee: false,
+	resultats: []
+}));
+
+		if (courses.length > 0) {
+			selectCourse(courses[0]);
 		}
-	];
+	} catch (e) {
+		console.error('Erreur chargement courses', e);
+	}
+});
+
+	let courses = [];
 
 	let selectedCourse = { ...courses[0] };
 	let selectedIndex = 0;
@@ -55,11 +36,6 @@
 	let resultMode = false;
 	let filter = 'all'; // all | active | finished
 
-	function getFilteredCourses() {
-		if (filter === 'active') return courses.filter((course) => !course.terminee);
-		if (filter === 'finished') return courses.filter((course) => course.terminee);
-		return courses;
-	}
 
 	function findRealIndex(courseId) {
 		return courses.findIndex((course) => course.id === courseId);
@@ -116,36 +92,43 @@
 
 	async function createCourse() {
 	try {
-		const newCourse = {
-			...structuredClone(selectedCourse),
-			id: courses.length ? Math.max(...courses.map((c) => c.id)) + 1 : 1,
-			terminee: false
+		const payload = {
+			name: selectedCourse.nom,
+			location: selectedCourse.parcours || "Non défini",
+			date: selectedCourse.date
 		};
 
-		const response = await fetch('http://localhost:4000/api/course', {
+		const response = await fetch('http://localhost:4000/api/addrace', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify(newCourse)
+			body: JSON.stringify(payload)
 		});
 
 		if (!response.ok) {
 			throw new Error('Erreur lors de la création de la course');
 		}
 
-		const savedCourse = await response.json();
+		const result = await response.json();
 
-		courses = [...courses, savedCourse];
+		const newCourse = {
+	...structuredClone(selectedCourse),
+	id: result.id.$oid || result.id,
+	terminee: false
+};
+
+		courses = [...courses, newCourse];
 		selectedIndex = courses.length - 1;
-		selectedCourse = structuredClone(savedCourse);
+		selectedCourse = structuredClone(newCourse);
 		createMode = false;
 
-		console.log('Course créée en DB:', savedCourse);
+		console.log('Course créée en DB:', result);
 
 	} catch (error) {
-		console.error(error);
-		alert('Erreur lors de la création de la course');
+		const text = await response.text();
+	console.error('Erreur API:', text);
+	alert(text);
 	}
 }
 

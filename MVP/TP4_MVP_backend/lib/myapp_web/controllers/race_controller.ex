@@ -24,6 +24,7 @@ defmodule MyappWeb.RaceController do
           })
 
         {:error, reason} ->
+          IO.inspect(reason, label: "MONGO ERROR")
           conn
           |> put_status(500)
           |> json(%{error: inspect(reason)})
